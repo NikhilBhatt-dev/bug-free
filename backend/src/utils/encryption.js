@@ -1,0 +1,41 @@
+const crypto = require("crypto");
+const { ApiError } = require("./apiError");
+
+function getEncryptionKey() {
+  const key = Buffer.from(process.env.GMAIL_TOKEN_ENCRYPTION_KEY || "", "base64");
+  if (key.length !== 32) {
+    throw new ApiError(503, "Gmail token encryption is not configured", "GMAIL_NOT_CONFIGURED");
+  }
+  return key;
+}
+
+function encryptSecret(value) {
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv("aes-256-gcm", getEncryptionKey(), iv);
+  const encrypted = Buffer.concat([cipher.update(value, "utf8"), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  return [iv, tag, encrypted].map((part) => part.toString("base64url")).join(".");
+}
+
+function decryptSecret(payload) {
+  const [ivValue, tagValue, encryptedValue] = String(payload).split(".");
+  if (!ivValue || !tagValue || !encryptedValue) {
+    throw new ApiError(500, "Stored Gmail credentials are invalid", "GMAIL_TOKEN_INVALID");
+  }
+  try {
+    const decipher = crypto.createDecipheriv(
+      "aes-256-gcm",
+      getEncryptionKey(),
+      Buffer.from(ivValue, "base64url"),
+    );
+    decipher.setAuthTag(Buffer.from(tagValue, "base64url"));
+    return Buffer.concat([
+      decipher.update(Buffer.from(encryptedValue, "base64url")),
+      decipher.final(),
+    ]).toString("utf8");
+  } catch {
+    throw new ApiError(500, "Stored Gmail credentials cannot be decrypted", "GMAIL_TOKEN_INVALID");
+  }
+}
+
+module.exports = { decryptSecret, encryptSecret };

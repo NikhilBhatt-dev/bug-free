@@ -1,4 +1,15 @@
-const requiredInProduction = ["MONGODB_URI", "JWT_SECRET", "FRONTEND_URL"];
+const requiredInProduction = [
+  "MONGODB_URI",
+  "JWT_SECRET",
+  "FRONTEND_URL",
+  "GOOGLE_CLIENT_ID",
+  "GOOGLE_CLIENT_SECRET",
+  "GOOGLE_CALLBACK_URL",
+  "GMAIL_CLIENT_ID",
+  "GMAIL_CLIENT_SECRET",
+  "GMAIL_REDIRECT_URI",
+  "GMAIL_TOKEN_ENCRYPTION_KEY",
+];
 
 function validateEnvironment() {
   if (process.env.NODE_ENV !== "production") return;

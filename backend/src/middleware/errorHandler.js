@@ -8,7 +8,21 @@ function notFoundHandler(req, res) {
 }
 
 function errorHandler(error, req, res, next) {
-  const statusCode = error.statusCode || 500;
+  let statusCode = error.statusCode || 500;
+  let message = error.message;
+  let code = error.code || "INTERNAL_SERVER_ERROR";
+
+  if (error.name === "ValidationError") {
+    statusCode = 400;
+    message = "Validation failed";
+    code = "VALIDATION_ERROR";
+  }
+
+  if (error.code === 11000) {
+    statusCode = 409;
+    message = "A record with these values already exists";
+    code = "DUPLICATE_RECORD";
+  }
 
   if (statusCode >= 500) {
     console.error("Unhandled request error", {
@@ -20,10 +34,9 @@ function errorHandler(error, req, res, next) {
 
   return res.status(statusCode).json({
     success: false,
-    message:
-      statusCode === 500 ? "An unexpected error occurred" : error.message,
+    message: statusCode === 500 ? "An unexpected error occurred" : message,
     data: null,
-    error: { code: error.code || "INTERNAL_SERVER_ERROR" },
+    error: { code, details: error.details || null },
   });
 }
 

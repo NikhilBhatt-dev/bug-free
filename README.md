@@ -20,4 +20,4 @@ The phase-one backend health check is available at `http://localhost:5000/api/he
 
 ## Status
 
-Phase 1 establishes the project scaffold, tooling, environment templates, and API security baseline. Authentication, database models, and third-party integrations are intentionally deferred to later phases.
+Phase 3 backend work is in progress. Application, CV, and email-template APIs are integrated, and Gmail OAuth connection management is implemented. Gmail message sending and batch processing are not yet implemented. See [authentication setup](docs/authentication.md) before running the API.

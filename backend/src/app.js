@@ -1,8 +1,15 @@
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const express = require("express");
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
+const { passport } = require("./config/passport");
+const authRoutes = require("./routes/auth.routes");
 const healthRoutes = require("./routes/health.routes");
+const applicationRoutes = require("./routes/applications.routes");
+const cvRoutes = require("./routes/cvs.routes");
+const templateRoutes = require("./routes/templates.routes");
+const gmailRoutes = require("./routes/gmail.routes");
 const { errorHandler, notFoundHandler } = require("./middleware/errorHandler");
 
 const app = express();
@@ -24,6 +31,8 @@ app.use(
 );
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));
+app.use(cookieParser());
+app.use(passport.initialize());
 app.use(
   "/api",
   rateLimit({
@@ -41,6 +50,11 @@ app.use(
 );
 
 app.use("/api", healthRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/applications", applicationRoutes);
+app.use("/api/cvs", cvRoutes);
+app.use("/api/email-templates", templateRoutes);
+app.use("/api/gmail", gmailRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
