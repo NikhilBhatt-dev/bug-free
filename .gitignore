@@ -1,0 +1,18 @@
+# Dependencies and builds
+**/node_modules/
+**/.next/
+**/coverage/
+
+# Secrets and local configuration
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+
+# Tooling and OS files
+.vercel/
+.DS_Store
+npm-debug.log*
+*.log
