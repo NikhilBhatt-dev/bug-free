@@ -5,7 +5,9 @@ function validateEnvironment() {
 
   const missing = requiredInProduction.filter((key) => !process.env[key]);
   if (missing.length) {
-    throw new Error(`Missing required environment variables: ${missing.join(", ")}`);
+    throw new Error(
+      `Missing required environment variables: ${missing.join(", ")}`,
+    );
   }
 }
 

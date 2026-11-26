@@ -20,7 +20,8 @@ function errorHandler(error, req, res, next) {
 
   return res.status(statusCode).json({
     success: false,
-    message: statusCode === 500 ? "An unexpected error occurred" : error.message,
+    message:
+      statusCode === 500 ? "An unexpected error occurred" : error.message,
     data: null,
     error: { code: error.code || "INTERNAL_SERVER_ERROR" },
   });

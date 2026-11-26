@@ -1,7 +1,9 @@
-import { defineConfig, globalIgnores } from "eslint/config";
-
-export default defineConfig([
+module.exports = [
   {
+    ignores: ["node_modules/**", "coverage/**"],
+  },
+  {
+    files: ["**/*.js"],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "commonjs",
@@ -10,5 +12,4 @@ export default defineConfig([
       "no-console": ["warn", { allow: ["warn", "error", "log"] }],
     },
   },
-  globalIgnores(["node_modules/**", "coverage/**"]),
-]);
+];

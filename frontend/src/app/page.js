@@ -29,7 +29,8 @@ export default function Home() {
             Get started <ArrowRight className="size-4" />
           </Link>
           <span className="inline-flex items-center gap-2 px-2 py-2.5 text-sm text-zinc-500">
-            <ShieldCheck className="size-4 text-zinc-400" /> Review before sending
+            <ShieldCheck className="size-4 text-zinc-400" /> Review before
+            sending
           </span>
         </div>
       </section>
