@@ -19,7 +19,7 @@ const requiredInProduction = [
 ];
 
 const placeholderPattern =
-  /<[^>]+>|^(?:example|your|replace|placeholder|default|change[-_ ]?me)(?:[-_ ]|$)/i;
+  /<[^>]+>|^(?:example|your|replace|placeholder|default|change[-_ ]?me|test|sample|demo|dummy|fake|development|dev|local|insecure|secret|password)(?:[-_ ]|$)/i;
 
 function isPlaceholder(value) {
   return placeholderPattern.test(value);
@@ -44,7 +44,7 @@ function isHttpsUrl(value, expectedPath) {
       !url.hash &&
       !url.search &&
       (!expectedPath || url.pathname === expectedPath) &&
-      !["localhost", "127.0.0.1", "::1"].includes(url.hostname)
+      !["localhost", "127.0.0.1", "::1", "[::1]"].includes(url.hostname)
     );
   } catch {
     return false;
@@ -61,7 +61,9 @@ function isHttpsOriginList(value) {
         return (
           url.protocol === "https:" &&
           url.origin === origin &&
-          !["localhost", "127.0.0.1", "::1"].includes(url.hostname)
+          !["localhost", "127.0.0.1", "::1", "[::1]"].includes(
+            url.hostname,
+          )
         );
       } catch {
         return false;

@@ -14,8 +14,8 @@ describe("Gmail OAuth configuration", () => {
   });
 
   it("creates the configured Gmail OAuth client without loading the broken API bundle", () => {
-    process.env.GMAIL_CLIENT_ID = "test-client-id";
-    process.env.GMAIL_CLIENT_SECRET = "test-client-secret";
+    process.env.GMAIL_CLIENT_ID = "fixture-client-id";
+    process.env.GMAIL_CLIENT_SECRET = "fixture-client-secret";
     process.env.GMAIL_REDIRECT_URI =
       "http://localhost:5000/api/gmail/callback";
     process.env.GMAIL_TOKEN_ENCRYPTION_KEY =
@@ -35,7 +35,7 @@ describe("Gmail OAuth configuration", () => {
     );
 
     expect(authorizationUrl.searchParams.get("client_id")).toBe(
-      "test-client-id",
+      "fixture-client-id",
     );
     expect(authorizationUrl.searchParams.get("scope")).toBe(GMAIL_SEND_SCOPE);
     expect(authorizationUrl.searchParams.get("state")).toBe("test-state");
@@ -43,7 +43,7 @@ describe("Gmail OAuth configuration", () => {
 
   it("reports missing Gmail variables by name without including their values", () => {
     process.env.GMAIL_CLIENT_ID = "";
-    process.env.GMAIL_CLIENT_SECRET = "test-client-secret";
+    process.env.GMAIL_CLIENT_SECRET = "fixture-client-secret";
     process.env.GMAIL_REDIRECT_URI =
       "http://localhost:5000/api/gmail/callback";
     process.env.GMAIL_TOKEN_ENCRYPTION_KEY = "";
@@ -57,12 +57,12 @@ describe("Gmail OAuth configuration", () => {
       invalid: [],
     });
     expect(isGmailConfigured()).toBe(false);
-    expect(JSON.stringify(issues)).not.toContain("test-client-secret");
+    expect(JSON.stringify(issues)).not.toContain("fixture-client-secret");
   });
 
   it("rejects malformed Gmail redirect URLs and encryption keys", () => {
-    process.env.GMAIL_CLIENT_ID = "test-client-id";
-    process.env.GMAIL_CLIENT_SECRET = "test-client-secret";
+    process.env.GMAIL_CLIENT_ID = "fixture-client-id";
+    process.env.GMAIL_CLIENT_SECRET = "fixture-client-secret";
     process.env.GMAIL_REDIRECT_URI = "not-a-url";
     process.env.GMAIL_TOKEN_ENCRYPTION_KEY = "not-base64";
 

@@ -14,32 +14,88 @@ function assertPdfSignature(file) {
   }
 }
 
+function getCloudinaryFailureDetails(error, reasonOverride) {
+  const status = Number(
+    error?.http_code ||
+      error?.statusCode ||
+      error?.status ||
+      error?.error?.http_code,
+  );
+  let reason = reasonOverride || "provider_error";
+
+  if (!reasonOverride) {
+    if (status === 401) reason = "authentication_rejected";
+    else if (status === 403) reason = "permission_denied";
+    else if (status === 400) reason = "upload_rejected";
+    else if (status === 429) reason = "rate_limited";
+    else if (status >= 500) reason = "provider_unavailable";
+    else if (
+      ["ECONNRESET", "ETIMEDOUT", "ENOTFOUND", "EAI_AGAIN"].includes(
+        error?.code,
+      )
+    ) {
+      reason = "network_error";
+    }
+  }
+
+  return {
+    reason,
+    ...(Number.isInteger(status) && status >= 100 && status <= 599
+      ? { httpStatus: status }
+      : {}),
+  };
+}
+
 function uploadPdf(file, userId) {
   return new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        resource_type: "raw",
-        type: "private",
-        folder: `jobpilot/${userId}/cvs`,
-        filename_override: file.originalname,
-        use_filename: false,
-        unique_filename: true,
-      },
-      (error, result) => {
-        if (error) {
-          reject(
-            new ApiError(
-              502,
-              "CV upload could not be completed",
-              "CV_UPLOAD_FAILED",
-            ),
-          );
-          return;
-        }
-        resolve(result);
-      },
-    );
-    stream.end(file.buffer);
+    let settled = false;
+    const fail = (error, reasonOverride) => {
+      if (settled) return;
+      settled = true;
+      const details = getCloudinaryFailureDetails(error, reasonOverride);
+      console.error(
+        "Cloudinary CV upload failed",
+        details,
+      );
+      reject(
+        new ApiError(
+          502,
+          "CV upload could not be completed",
+          "CV_UPLOAD_FAILED",
+          { reason: details.reason },
+        ),
+      );
+    };
+
+    try {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          resource_type: "raw",
+          type: "private",
+          folder: `jobpilot/${userId}/cvs`,
+          filename_override: file.originalname,
+          use_filename: false,
+          unique_filename: true,
+        },
+        (error, result) => {
+          if (error) {
+            fail(error);
+            return;
+          }
+          if (!result?.public_id || !result?.secure_url || !result?.version) {
+            fail(null, "invalid_provider_response");
+            return;
+          }
+          if (settled) return;
+          settled = true;
+          resolve(result);
+        },
+      );
+      stream.on?.("error", fail);
+      stream.end(file.buffer);
+    } catch (error) {
+      fail(error);
+    }
   });
 }
 

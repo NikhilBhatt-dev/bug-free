@@ -15,3 +15,8 @@ npm-debug.log*
 
 
 .docx
+.md
+!.env.example
+.md
+.docx
+.pdf

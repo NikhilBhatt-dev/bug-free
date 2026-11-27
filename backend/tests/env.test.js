@@ -78,6 +78,10 @@ describe("production environment validation", () => {
     process.env.JWT_SECRET = "short";
     expect(() => validateEnvironment()).toThrow(/JWT_SECRET/);
 
+    process.env.JWT_SECRET =
+      "example-placeholder-value-that-is-long-enough-to-look-plausible";
+    expect(() => validateEnvironment()).toThrow(/JWT_SECRET/);
+
     delete process.env.JWT_SECRET;
     let message;
     try {

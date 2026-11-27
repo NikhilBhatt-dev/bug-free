@@ -8,7 +8,7 @@ const REQUIRED_GMAIL_ENV = [
 ];
 
 function isPlaceholder(value) {
-  return /<[^>]+>|^(?:example|your|replace|placeholder|default|change[-_ ]?me)(?:[-_ ]|$)/i.test(
+  return /<[^>]+>|^(?:example|your|replace|placeholder|default|change[-_ ]?me|test|sample|demo|dummy|fake|development|dev|local|insecure|secret|password)(?:[-_ ]|$)/i.test(
     value,
   );
 }

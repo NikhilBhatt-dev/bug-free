@@ -31,25 +31,43 @@ describe("CV service Cloudinary safety", () => {
   });
 
   it("does not touch the database when Cloudinary upload fails", async () => {
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    const providerError = new Error("provider-token-must-not-be-logged");
+    providerError.http_code = 401;
     mockUploadStream.mockImplementation((options, callback) => ({
-      end: jest.fn(() => callback(new Error("provider failure"))),
+      end: jest.fn(() => callback(providerError)),
     }));
 
-    await expect(
-      cvService.uploadCv(
-        "6b084ad86629da63beb44419",
-        "technology",
-        {
-          buffer: Buffer.from("%PDF-test"),
-          originalname: "resume.pdf",
-          mimetype: "application/pdf",
-          size: 12,
-        },
-      ),
-    ).rejects.toMatchObject({
-      statusCode: 502,
-      code: "CV_UPLOAD_FAILED",
-    });
+    try {
+      await expect(
+        cvService.uploadCv(
+          "6b084ad86629da63beb44419",
+          "technology",
+          {
+            buffer: Buffer.from("%PDF-test"),
+            originalname: "resume.pdf",
+            mimetype: "application/pdf",
+            size: 12,
+          },
+        ),
+      ).rejects.toMatchObject({
+        statusCode: 502,
+        code: "CV_UPLOAD_FAILED",
+        details: { reason: "authentication_rejected" },
+      });
+
+      expect(consoleError).toHaveBeenCalledWith(
+        "Cloudinary CV upload failed",
+        { reason: "authentication_rejected", httpStatus: 401 },
+      );
+      expect(JSON.stringify(consoleError.mock.calls)).not.toContain(
+        "provider-token-must-not-be-logged",
+      );
+    } finally {
+      consoleError.mockRestore();
+    }
 
     expect(CV.findOne).not.toHaveBeenCalled();
     expect(CV.findOneAndUpdate).not.toHaveBeenCalled();
