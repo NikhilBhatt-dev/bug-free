@@ -90,7 +90,7 @@ describe("Gmail OAuth routes", () => {
 
     expect(response.status).toBe(302);
     expect(response.headers.location).toBe(
-      "http://localhost:3000/settings?gmail=connected",
+      "http://localhost:3000/gmail?gmail=connected",
     );
     expect(gmailService.verifyConnectionState).toHaveBeenCalledWith(
       oauthState,
@@ -112,7 +112,7 @@ describe("Gmail OAuth routes", () => {
 
     expect(response.status).toBe(302);
     expect(response.headers.location).toBe(
-      "http://localhost:3000/settings?gmail=error&reason=invalid_state",
+      "http://localhost:3000/gmail?gmail=error&reason=invalid_state",
     );
     expect(gmailService.connectGmail).not.toHaveBeenCalled();
   });
@@ -132,10 +132,10 @@ describe("Gmail OAuth routes", () => {
       .set("Cookie", stateCookie);
 
     expect(denied.headers.location).toBe(
-      "http://localhost:3000/settings?gmail=error&reason=access_denied",
+      "http://localhost:3000/gmail?gmail=error&reason=access_denied",
     );
     expect(missingCode.headers.location).toBe(
-      "http://localhost:3000/settings?gmail=error&reason=missing_code",
+      "http://localhost:3000/gmail?gmail=error&reason=missing_code",
     );
     expect(gmailService.connectGmail).not.toHaveBeenCalled();
   });
@@ -156,7 +156,7 @@ describe("Gmail OAuth routes", () => {
       .set("Cookie", stateCookie);
 
     expect(response.headers.location).toBe(
-      "http://localhost:3000/settings?gmail=error&reason=gmail_oauth_exchange_failed",
+      "http://localhost:3000/gmail?gmail=error&reason=gmail_oauth_exchange_failed",
     );
     expect(response.headers.location).not.toContain("oauth-code");
   });

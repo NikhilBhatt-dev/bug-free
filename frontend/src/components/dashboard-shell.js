@@ -28,11 +28,11 @@ const navItems = [
   { label: "Applications", href: "/applications", icon: BriefcaseBusiness },
   { label: "CV Manager", href: "/cv-management", icon: FileText },
   { label: "Email Templates", href: "/email-templates", icon: Mail },
-  { label: "Gmail Integration", href: "/gmail", icon: Send, comingSoon: true },
-  { label: "Email Campaigns", href: "/email-composer", icon: Send, comingSoon: true },
-  { label: "Sent History", href: "/sent-history", icon: FolderKanban, comingSoon: true },
-  { label: "Analytics", href: "/analytics", icon: BarChart3, comingSoon: true },
-  { label: "Settings", href: "/settings", icon: Settings, comingSoon: true },
+  { label: "Gmail Integration", href: "/gmail", icon: Send },
+  { label: "Email Campaigns", href: "/email-composer", icon: Send },
+  { label: "Sent History", href: "/sent-history", icon: FolderKanban },
+  { label: "Analytics", href: "/analytics", icon: BarChart3 },
+  { label: "Settings", href: "/settings", icon: Settings },
 ];
 
 export function DashboardShell({ children }) {
