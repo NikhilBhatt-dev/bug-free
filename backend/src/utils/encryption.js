@@ -2,9 +2,19 @@ const crypto = require("crypto");
 const { ApiError } = require("./apiError");
 
 function getEncryptionKey() {
-  const key = Buffer.from(process.env.GMAIL_TOKEN_ENCRYPTION_KEY || "", "base64");
-  if (key.length !== 32) {
-    throw new ApiError(503, "Gmail token encryption is not configured", "GMAIL_NOT_CONFIGURED");
+  const encodedKey = process.env.GMAIL_TOKEN_ENCRYPTION_KEY || "";
+  const key = Buffer.from(encodedKey, "base64");
+  if (key.length !== 32 || key.toString("base64") !== encodedKey) {
+    throw new ApiError(
+      503,
+      "Gmail token encryption is not configured correctly",
+      "GMAIL_NOT_CONFIGURED",
+      {
+        missing: encodedKey ? [] : ["GMAIL_TOKEN_ENCRYPTION_KEY"],
+        invalid: encodedKey ? ["GMAIL_TOKEN_ENCRYPTION_KEY"] : [],
+        expectedFormat: "Base64-encoded 32-byte key",
+      },
+    );
   }
   return key;
 }

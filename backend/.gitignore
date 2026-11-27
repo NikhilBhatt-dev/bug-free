@@ -1,0 +1,4 @@
+# Ignore local and deployment environment files; keep the safe template trackable.
+.env
+.env.*
+!.env.example

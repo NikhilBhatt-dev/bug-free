@@ -1,5 +1,10 @@
 const crypto = require("crypto");
-const { createGmailOAuthClient, GMAIL_SEND_SCOPE, isGmailConfigured } = require("../config/gmail");
+const {
+  createGmailOAuthClient,
+  GMAIL_SEND_SCOPE,
+  getGmailConfigurationIssues,
+  isGmailConfigured,
+} = require("../config/gmail");
 const { cloudinary, isCloudinaryConfigured } = require("../config/cloudinary");
 const { UserSettings } = require("../models");
 const { ApiError } = require("../utils/apiError");
@@ -7,7 +12,13 @@ const { decryptSecret, encryptSecret } = require("../utils/encryption");
 
 function assertGmailConfigured() {
   if (!isGmailConfigured()) {
-    throw new ApiError(503, "Gmail sending is not configured", "GMAIL_NOT_CONFIGURED");
+    const { missing, invalid } = getGmailConfigurationIssues();
+    throw new ApiError(
+      503,
+      "Gmail sending is not configured",
+      "GMAIL_NOT_CONFIGURED",
+      { missing, invalid },
+    );
   }
 }
 

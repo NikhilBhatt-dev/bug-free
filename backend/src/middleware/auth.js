@@ -68,7 +68,21 @@ function requireSelf(paramName = "userId") {
 
 function requireSameOrigin(req, res, next) {
   const origin = req.get("origin");
-  if (!origin) return next();
+  if (!origin) {
+    const hasBearerToken = /^Bearer\s+\S+$/i.test(
+      req.get("authorization") || "",
+    );
+    if (process.env.NODE_ENV === "production" && !hasBearerToken) {
+      return next(
+        new ApiError(
+          403,
+          "A trusted request origin is required",
+          "ORIGIN_REQUIRED",
+        ),
+      );
+    }
+    return next();
+  }
 
   const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:3000")
     .split(",")

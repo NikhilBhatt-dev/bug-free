@@ -1,6 +1,6 @@
 # JobPilot
 
-JobPilot is a personal job-application workspace. It will provide application tracking, category-specific CVs, reviewable email templates, and carefully rate-limited Gmail sending.
+JobPilot is a personal job-application workspace for application tracking, category-specific CVs, reviewable email templates, and carefully rate-limited Gmail sending.
 
 ## Repository layout
 
@@ -16,8 +16,8 @@ JobPilot is a personal job-application workspace. It will provide application tr
 3. In one terminal, run `npm run dev` inside `frontend`.
 4. In another terminal, run `npm run dev` inside `backend`.
 
-The phase-one backend health check is available at `http://localhost:5000/api/health`.
+The backend health check is available at `http://localhost:5000/api/health`.
 
 ## Status
 
-Phase 3 backend work includes application, CV, email-template, Gmail OAuth, confirmed email previews, persisted batches, in-process sending, sending limits, and sent history APIs. See [API documentation](docs/api.md) and [authentication setup](docs/authentication.md) before running the API.
+The backend includes application, CV, email-template, Gmail OAuth, confirmed email previews, persisted batches, in-process sending, sending limits, and sent history APIs. See [API documentation](docs/api.md), [authentication setup](docs/authentication.md), and the [production deployment and security checklist](docs/production.md).

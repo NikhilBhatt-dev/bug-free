@@ -8,6 +8,7 @@ const app = require("../src/app");
 const { authenticate, requireSelf } = require("../src/middleware/auth");
 const { errorHandler } = require("../src/middleware/errorHandler");
 const { signAccessToken } = require("../src/utils/jwt");
+const { passport } = require("../src/config/passport");
 
 const user = {
   _id: new mongoose.Types.ObjectId(),
@@ -46,6 +47,35 @@ describe("authentication and authorization", () => {
 
     expect(response.status).toBe(401);
     expect(response.body.error.code).toBe("AUTH_INVALID");
+  });
+
+  it("preserves Google OAuth callback handling without an Origin header", async () => {
+    const previousNodeEnv = process.env.NODE_ENV;
+    const previousFrontendUrl = process.env.FRONTEND_URL;
+    process.env.NODE_ENV = "production";
+    process.env.FRONTEND_URL = "https://app.example.test";
+    const authenticateSpy = jest
+      .spyOn(passport, "authenticate")
+      .mockImplementation(
+        (strategy, options, callback) => (req, res) => callback(null, null),
+      );
+
+    try {
+      const response = await request(app)
+        .get("/api/auth/google/callback?state=matching-state")
+        .set("Cookie", "jobpilot_oauth_state=matching-state");
+
+      expect(response.status).toBe(302);
+      expect(response.headers.location).toBe(
+        "https://app.example.test/login?error=google_login_failed",
+      );
+    } finally {
+      authenticateSpy.mockRestore();
+      if (previousNodeEnv === undefined) delete process.env.NODE_ENV;
+      else process.env.NODE_ENV = previousNodeEnv;
+      if (previousFrontendUrl === undefined) delete process.env.FRONTEND_URL;
+      else process.env.FRONTEND_URL = previousFrontendUrl;
+    }
   });
 
   it("prevents a user from passing another user's id in a protected route", async () => {

@@ -12,6 +12,7 @@ const mockOAuthClient = {
 jest.mock("../src/config/gmail", () => ({
   createGmailOAuthClient: jest.fn(() => mockOAuthClient),
   GMAIL_SEND_SCOPE: "https://www.googleapis.com/auth/gmail.send",
+  getGmailConfigurationIssues: jest.fn(() => ({ missing: [], invalid: [] })),
   isGmailConfigured: jest.fn(() => true),
 }));
 
@@ -23,7 +24,11 @@ jest.mock("../src/models", () => ({
 }));
 
 const { UserSettings } = require("../src/models");
-const { GMAIL_SEND_SCOPE } = require("../src/config/gmail");
+const {
+  GMAIL_SEND_SCOPE,
+  getGmailConfigurationIssues,
+  isGmailConfigured,
+} = require("../src/config/gmail");
 const gmailService = require("../src/services/gmail.service");
 const { decryptSecret, encryptSecret } = require("../src/utils/encryption");
 const { ApiError } = require("../src/utils/apiError");
@@ -31,6 +36,8 @@ const { ApiError } = require("../src/utils/apiError");
 describe("Gmail OAuth service", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    isGmailConfigured.mockReturnValue(true);
+    getGmailConfigurationIssues.mockReturnValue({ missing: [], invalid: [] });
     mockOAuthClient.getToken.mockReset();
     mockOAuthClient.generateAuthUrl.mockReset();
     mockOAuthClient.revokeCredentials.mockReset();
@@ -109,6 +116,25 @@ describe("Gmail OAuth service", () => {
       message: "Google authorization could not be completed",
     });
     expect(UserSettings.updateOne).not.toHaveBeenCalled();
+  });
+
+  it("returns safe Gmail configuration details when sending is unconfigured", async () => {
+    isGmailConfigured.mockReturnValue(false);
+    getGmailConfigurationIssues.mockReturnValue({
+      missing: ["GMAIL_CLIENT_ID"],
+      invalid: ["GMAIL_TOKEN_ENCRYPTION_KEY"],
+    });
+
+    await expect(
+      gmailService.sendEmail("user-1", {}, {}),
+    ).rejects.toMatchObject({
+      statusCode: 503,
+      code: "GMAIL_NOT_CONFIGURED",
+      details: {
+        missing: ["GMAIL_CLIENT_ID"],
+        invalid: ["GMAIL_TOKEN_ENCRYPTION_KEY"],
+      },
+    });
   });
 
   it("returns only public connection status fields", async () => {

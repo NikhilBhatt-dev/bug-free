@@ -80,26 +80,38 @@ describe("Gmail OAuth routes", () => {
   });
 
   it("completes OAuth callback and redirects only to the configured frontend", async () => {
+    const previousNodeEnv = process.env.NODE_ENV;
+    const previousFrontendUrl = process.env.FRONTEND_URL;
+    process.env.NODE_ENV = "production";
+    process.env.FRONTEND_URL =
+      "https://app.example.test,https://secondary.example.test";
     gmailService.verifyConnectionState.mockReturnValue(true);
     gmailService.connectGmail.mockResolvedValue(undefined);
 
-    const response = await request(app)
-      .get(`/api/gmail/callback?state=${encodeURIComponent(oauthState)}&code=oauth-code`)
-      .set("Authorization", `Bearer ${token}`)
-      .set("Cookie", stateCookie);
+    try {
+      const response = await request(app)
+        .get(`/api/gmail/callback?state=${encodeURIComponent(oauthState)}&code=oauth-code`)
+        .set("Authorization", `Bearer ${token}`)
+        .set("Cookie", stateCookie);
 
-    expect(response.status).toBe(302);
-    expect(response.headers.location).toBe(
-      "http://localhost:3000/gmail?gmail=connected",
-    );
-    expect(gmailService.verifyConnectionState).toHaveBeenCalledWith(
-      oauthState,
-      user._id.toString(),
-    );
-    expect(gmailService.connectGmail).toHaveBeenCalledWith(
-      user._id.toString(),
-      "oauth-code",
-    );
+      expect(response.status).toBe(302);
+      expect(response.headers.location).toBe(
+        "https://app.example.test/gmail?gmail=connected",
+      );
+      expect(gmailService.verifyConnectionState).toHaveBeenCalledWith(
+        oauthState,
+        user._id.toString(),
+      );
+      expect(gmailService.connectGmail).toHaveBeenCalledWith(
+        user._id.toString(),
+        "oauth-code",
+      );
+    } finally {
+      if (previousNodeEnv === undefined) delete process.env.NODE_ENV;
+      else process.env.NODE_ENV = previousNodeEnv;
+      if (previousFrontendUrl === undefined) delete process.env.FRONTEND_URL;
+      else process.env.FRONTEND_URL = previousFrontendUrl;
+    }
   });
 
   it("rejects invalid OAuth state without exchanging the code", async () => {

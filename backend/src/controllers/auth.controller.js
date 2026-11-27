@@ -18,6 +18,26 @@ const {
 const AUTH_COOKIE = "jobpilot_auth";
 const OAUTH_STATE_COOKIE = "jobpilot_oauth_state";
 
+function getFrontendRedirect(path) {
+  const frontendOrigin = (
+    process.env.FRONTEND_URL || "http://localhost:3000"
+  )
+    .split(",")[0]
+    .trim();
+
+  try {
+    const url = new URL(frontendOrigin);
+    if (!["http:", "https:"].includes(url.protocol)) throw new Error();
+    return new URL(path, url.origin).toString();
+  } catch {
+    throw new ApiError(
+      503,
+      "Frontend redirect is not configured",
+      "FRONTEND_REDIRECT_NOT_CONFIGURED",
+    );
+  }
+}
+
 function clearOAuthState(res) {
   const { maxAge, ...clearOptions } = getOAuthStateCookieOptions();
   res.clearCookie(OAUTH_STATE_COOKIE, clearOptions);
@@ -75,15 +95,15 @@ function handleGoogleCallback(req, res, next) {
     async (error, profile) => {
       if (error) return next(error);
       if (!profile)
-        return res.redirect(
-          `${process.env.FRONTEND_URL}/login?error=google_login_failed`,
-        );
+      return res.redirect(
+        getFrontendRedirect("/login?error=google_login_failed"),
+      );
 
       try {
         const user = await findOrCreateGoogleUser(profile);
         const token = createLoginToken(user);
         res.cookie(AUTH_COOKIE, token, getAuthCookieOptions());
-        return res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
+      return res.redirect(getFrontendRedirect("/dashboard"));
       } catch (serviceError) {
         return next(serviceError);
       }
