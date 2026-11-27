@@ -10,13 +10,21 @@ const sentEmailSchema = new mongoose.Schema(
     applicationId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Application",
-      required: true,
+      default: null,
     },
     emailJobId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "EmailJob",
       default: null,
     },
+    batchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "EmailJob",
+      default: null,
+    },
+    companyName: { type: String, trim: true, maxlength: 160, default: null },
+    jobRole: { type: String, trim: true, maxlength: 160, default: null },
+    category: { type: String, trim: true, maxlength: 50, default: null },
     recipient: {
       type: String,
       required: true,
@@ -54,6 +62,7 @@ const sentEmailSchema = new mongoose.Schema(
 
 sentEmailSchema.index({ userId: 1, createdAt: -1 });
 sentEmailSchema.index({ userId: 1, applicationId: 1, createdAt: -1 });
+sentEmailSchema.index({ userId: 1, emailJobId: 1 }, { unique: true, sparse: true });
 sentEmailSchema.index({ userId: 1, idempotencyKey: 1 }, { unique: true });
 sentEmailSchema.index(
   { userId: 1, gmailMessageId: 1 },

@@ -188,7 +188,8 @@ describe("Gmail token encryption helper", () => {
     expect(decryptSecret(encrypted)).toBe("refresh-token-secret");
 
     const [iv, tag, ciphertext] = encrypted.split(".");
-    const modified = `${iv}.${tag}.${ciphertext.slice(0, -1)}A`;
+    const replacement = ciphertext[0] === "A" ? "B" : "A";
+    const modified = `${iv}.${tag}.${replacement}${ciphertext.slice(1)}`;
     expect(() => decryptSecret(modified)).toThrow(ApiError);
   });
 });

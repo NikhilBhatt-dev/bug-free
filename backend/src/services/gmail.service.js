@@ -209,7 +209,6 @@ function createRawMessage({ to, subject, body, attachment, attachmentName }) {
 }
 
 async function sendEmail(userId, email, cv) {
-  const { google } = require("googleapis");
   const client = await getAuthorizedGmailClient(userId);
   const attachment = await downloadPrivateCv(cv);
   const raw = createRawMessage({
@@ -219,8 +218,51 @@ async function sendEmail(userId, email, cv) {
     attachment,
     attachmentName: cv.originalFileName,
   });
-  const gmail = google.gmail({ version: "v1", auth: client });
-  return gmail.users.messages.send({ userId: "me", requestBody: { raw } });
+  const accessTokenResponse = await client.getAccessToken();
+  const accessToken =
+    typeof accessTokenResponse === "string"
+      ? accessTokenResponse
+      : accessTokenResponse?.token;
+  if (!accessToken) {
+    throw new ApiError(
+      502,
+      "Gmail access token could not be obtained",
+      "GMAIL_TOKEN_UNAVAILABLE",
+    );
+  }
+  const response = await fetch(
+    "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ raw }),
+    },
+  );
+  if (!response.ok) {
+    const status = response.status;
+    let reason = null;
+    try {
+      const providerBody = await response.json();
+      reason =
+        providerBody?.error?.errors?.[0]?.reason ||
+        providerBody?.error?.status ||
+        null;
+    } catch {}
+    const error = new Error("Gmail send request failed");
+    error.code = status;
+    error.response = {
+      status,
+      data: {
+        error: { errors: reason ? [{ reason }] : [] },
+      },
+    };
+    throw error;
+  }
+  const result = await response.json();
+  return { data: { id: result.id, threadId: result.threadId } };
 }
 
 function isGmailRateLimitError(error) {

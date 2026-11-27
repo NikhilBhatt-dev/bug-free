@@ -1,0 +1,62 @@
+{
+  "info": {
+    "name": "JobPilot Phase 3",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Gmail Status",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/gmail/status"
+      }
+    },
+    {
+      "name": "Preview Email",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"applicationId\": \"{{applicationId}}\",\n  \"templateId\": \"{{templateId}}\",\n  \"recipient\": \"hr@example.com\"\n}"
+        },
+        "url": "{{baseUrl}}/email-preview/preview"
+      }
+    },
+    {
+      "name": "Create Email Batch",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"idempotencyKey\": \"{{batchIdempotencyKey}}\",\n  \"items\": []\n}"
+        },
+        "url": "{{baseUrl}}/email-batches"
+      }
+    },
+    {
+      "name": "List Sent Emails",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/sent-emails?page=1&limit=20"
+      }
+    },
+    {
+      "name": "Sending Settings",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/user-settings/sending"
+      }
+    }
+  ],
+  "variable": [
+    {"key": "baseUrl", "value": "http://localhost:5000/api"},
+    {"key": "applicationId", "value": ""},
+    {"key": "templateId", "value": ""},
+    {"key": "batchIdempotencyKey", "value": ""}
+  ]
+}

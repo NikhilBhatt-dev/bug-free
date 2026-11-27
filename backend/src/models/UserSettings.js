@@ -25,6 +25,9 @@ const userSettingsSchema = new mongoose.Schema(
       encryptedRefreshToken: { type: String, default: null, select: false },
       grantedScopes: { type: [String], default: [] },
     },
+    pausedSending: { type: Boolean, default: false },
+    pauseReason: { type: String, trim: true, maxlength: 1000, default: null },
+    pausedAt: { type: Date, default: null },
   },
   { timestamps: true },
 );

@@ -5,7 +5,7 @@ const emailJobItemSchema = new mongoose.Schema(
     applicationId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Application",
-      required: true,
+      default: null,
     },
     sentEmailId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -19,6 +19,19 @@ const emailJobItemSchema = new mongoose.Schema(
     },
     attempts: { type: Number, default: 0, min: 0, max: 3 },
     error: { type: String, trim: true, maxlength: 1000, default: null },
+    companyName: { type: String, trim: true, maxlength: 160, default: null },
+    jobRole: { type: String, trim: true, maxlength: 160, default: null },
+    category: { type: String, trim: true, maxlength: 50, default: null },
+    recipient: { type: String, trim: true, lowercase: true, maxlength: 254, default: null },
+    subject: { type: String, trim: true, maxlength: 250, default: null },
+    body: { type: String, trim: true, maxlength: 20000, default: null },
+    cvReference: {
+      cvId: { type: mongoose.Schema.Types.ObjectId, ref: "CV", default: null },
+      cloudinaryPublicId: { type: String, trim: true, default: null },
+      originalFileName: { type: String, trim: true, default: null },
+    },
+    confirmedAt: { type: Date, default: null },
+    itemIdempotencyKey: { type: String, trim: true, maxlength: 128, default: null },
   },
   { _id: false },
 );
@@ -47,6 +60,8 @@ const emailJobSchema = new mongoose.Schema(
         "completed",
         "failed",
         "cancelled",
+        "sent",
+        "uncertain",
       ],
       default: "pending",
     },
@@ -62,6 +77,7 @@ const emailJobSchema = new mongoose.Schema(
     startedAt: { type: Date, default: null },
     completedAt: { type: Date, default: null },
     pauseReason: { type: String, trim: true, maxlength: 1000, default: null },
+    pausedAt: { type: Date, default: null },
   },
   { timestamps: true },
 );

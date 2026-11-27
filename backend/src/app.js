@@ -10,6 +10,10 @@ const applicationRoutes = require("./routes/applications.routes");
 const cvRoutes = require("./routes/cvs.routes");
 const templateRoutes = require("./routes/templates.routes");
 const gmailRoutes = require("./routes/gmail.routes");
+const emailPreviewRoutes = require("./routes/email-preview.routes");
+const emailBatchRoutes = require("./routes/email-batches.routes");
+const userSettingsRoutes = require("./routes/user-settings.routes");
+const sentEmailRoutes = require("./routes/sent-emails.routes");
 const { errorHandler, notFoundHandler } = require("./middleware/errorHandler");
 
 const app = express();
@@ -55,6 +59,10 @@ app.use("/api/applications", applicationRoutes);
 app.use("/api/cvs", cvRoutes);
 app.use("/api/email-templates", templateRoutes);
 app.use("/api/gmail", gmailRoutes);
+app.use("/api/email-preview", emailPreviewRoutes);
+app.use("/api/email-batches", emailBatchRoutes);
+app.use("/api/user-settings", userSettingsRoutes);
+app.use("/api/sent-emails", sentEmailRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
