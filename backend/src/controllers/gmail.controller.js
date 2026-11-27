@@ -54,7 +54,7 @@ function getFrontendRedirectUrl(outcome, reason) {
     );
   }
 
-  const redirectUrl = new URL("/settings", frontendUrl.origin);
+  const redirectUrl = new URL("/gmail", frontendUrl.origin);
   redirectUrl.searchParams.set("gmail", outcome);
   if (reason) redirectUrl.searchParams.set("reason", reason);
   return redirectUrl.toString();

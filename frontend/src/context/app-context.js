@@ -7,6 +7,7 @@ const AppContext = createContext(null);
 const initialState = {
   user: null,
   isAuthenticated: false,
+  isLoading: true,
 };
 
 function appReducer(state, action) {
@@ -15,6 +16,8 @@ function appReducer(state, action) {
       return { ...state, user: action.payload, isAuthenticated: true };
     case "SIGNED_OUT":
       return initialState;
+    case "SET_LOADING":
+      return { ...state, isLoading: action.payload };
     default:
       return state;
   }

@@ -64,6 +64,78 @@ describe("Application APIs", () => {
     expect(response.body.data.application).toEqual(created);
   });
 
+  it("accepts null sourceUrl, empty notes, technology category, and saved status", async () => {
+    const payload = {
+      companyName: "xyz",
+      jobRole: "sde",
+      applicationDate: "2026-11-27",
+      category: "technology",
+      hrName: "nikhil",
+      hrEmail: "hr@gmail.com",
+      notes: "",
+      sourceUrl: null,
+      status: "saved",
+    };
+    applicationService.createApplication.mockResolvedValue({
+      _id: applicationId,
+      ...payload,
+    });
+
+    const response = await request(app)
+      .post("/api/applications")
+      .set("Authorization", `Bearer ${ownedToken}`)
+      .send(payload);
+
+    expect(response.status).toBe(201);
+    expect(applicationService.createApplication).toHaveBeenCalledWith(
+      ownedUser._id.toString(),
+      expect.objectContaining({
+        companyName: "xyz",
+        jobRole: "sde",
+        category: "technology",
+        hrName: "nikhil",
+        hrEmail: "hr@gmail.com",
+        notes: "",
+        status: "saved",
+        sourceUrl: undefined,
+        applicationDate: expect.any(Date),
+      }),
+    );
+  });
+
+  it("rejects the exact invalid Gmail placeholder payload at hrEmail", async () => {
+    const payload = {
+      companyName: "xyz",
+      jobRole: "sde",
+      applicationDate: "2026-11-27",
+      category: "technology",
+      hrName: "nikhil",
+      hrEmail: "valid Gmail address",
+      notes: "",
+      sourceUrl: null,
+      status: "saved",
+    };
+
+    const response = await request(app)
+      .post("/api/applications")
+      .set("Authorization", `Bearer ${ownedToken}`)
+      .send(payload);
+
+    expect(response.status).toBe(400);
+    expect(response.body.error.details).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          path: "hrEmail",
+          msg: "Provide a valid HR email address",
+        }),
+      ]),
+    );
+    expect(
+      response.body.error.details.some((detail) => detail.path === "sourceUrl"),
+    ).toBe(false);
+    expect(applicationService.createApplication).not.toHaveBeenCalled();
+  });
+
   it("lists only applications for the authenticated user", async () => {
     applicationService.listApplications.mockResolvedValue({
       items: [{ _id: applicationId, ...validApplication }],

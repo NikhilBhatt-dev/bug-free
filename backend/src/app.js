@@ -14,6 +14,7 @@ const emailPreviewRoutes = require("./routes/email-preview.routes");
 const emailBatchRoutes = require("./routes/email-batches.routes");
 const userSettingsRoutes = require("./routes/user-settings.routes");
 const sentEmailRoutes = require("./routes/sent-emails.routes");
+const analyticsRoutes = require("./routes/analytics.routes");
 const { errorHandler, notFoundHandler } = require("./middleware/errorHandler");
 
 const app = express();
@@ -63,6 +64,7 @@ app.use("/api/email-preview", emailPreviewRoutes);
 app.use("/api/email-batches", emailBatchRoutes);
 app.use("/api/user-settings", userSettingsRoutes);
 app.use("/api/sent-emails", sentEmailRoutes);
+app.use("/api/analytics", analyticsRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
