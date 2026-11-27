@@ -1,5 +1,5 @@
 const originalFrontendUrl = process.env.FRONTEND_URL;
-process.env.FRONTEND_URL = "https://app.example.test";
+process.env.FRONTEND_URL = "https://job-pilot-8814.vercel.app";
 
 const request = require("supertest");
 const app = require("../src/app");
@@ -13,11 +13,11 @@ describe("CORS frontend origin allowlist", () => {
   it("allows configured frontend origins with credentials", async () => {
     const response = await request(app)
       .get("/api/health")
-      .set("Origin", "https://app.example.test");
+      .set("Origin", "https://job-pilot-8814.vercel.app");
 
     expect(response.status).toBe(200);
     expect(response.headers["access-control-allow-origin"]).toBe(
-      "https://app.example.test",
+      "https://job-pilot-8814.vercel.app",
     );
     expect(response.headers["access-control-allow-credentials"]).toBe("true");
   });

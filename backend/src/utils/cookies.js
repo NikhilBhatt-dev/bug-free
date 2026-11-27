@@ -6,6 +6,8 @@ function isSecureCookie() {
 }
 
 function getSameSite() {
+  if (process.env.NODE_ENV === "production") return "none";
+
   const configured = process.env.COOKIE_SAME_SITE;
   if (["lax", "strict", "none"].includes(configured)) return configured;
   return "lax";

@@ -40,6 +40,39 @@ describe("authentication and authorization", () => {
     expect(JSON.stringify(response.body)).not.toContain(token);
   });
 
+  it("clears the auth cookie with matching production cross-site options", async () => {
+    const previousNodeEnv = process.env.NODE_ENV;
+    const previousCookieSecure = process.env.COOKIE_SECURE;
+    const previousSameSite = process.env.COOKIE_SAME_SITE;
+    process.env.NODE_ENV = "production";
+    process.env.COOKIE_SECURE = "false";
+    process.env.COOKIE_SAME_SITE = "lax";
+
+    try {
+      const response = await request(app)
+        .post("/api/auth/logout")
+        .set("Authorization", `Bearer ${token}`);
+
+      expect(response.status).toBe(200);
+      const clearedCookie = response.headers["set-cookie"].find((cookie) =>
+        cookie.startsWith("jobpilot_auth="),
+      );
+      expect(clearedCookie).toContain("Path=/");
+      expect(clearedCookie).toContain("HttpOnly");
+      expect(clearedCookie).toContain("Secure");
+      expect(clearedCookie).toContain("SameSite=None");
+    } finally {
+      if (previousNodeEnv === undefined) delete process.env.NODE_ENV;
+      else process.env.NODE_ENV = previousNodeEnv;
+      if (previousCookieSecure === undefined)
+        delete process.env.COOKIE_SECURE;
+      else process.env.COOKIE_SECURE = previousCookieSecure;
+      if (previousSameSite === undefined)
+        delete process.env.COOKIE_SAME_SITE;
+      else process.env.COOKIE_SAME_SITE = previousSameSite;
+    }
+  });
+
   it("rejects malformed tokens", async () => {
     const response = await request(app)
       .get("/api/auth/me")
